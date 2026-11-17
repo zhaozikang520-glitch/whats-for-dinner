@@ -157,6 +157,18 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 .shop-list input:checked + label { text-decoration: line-through; color: var(--muted); }
 .progress { font-size: 13px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
 
+/* 首页主入口 */
+.hero-card { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color: var(--on-accent); border-radius: 20px; padding: 22px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.hero-art { font-size: 38px; letter-spacing: 6px; margin-bottom: 10px; }
+.hero-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.hero-desc { font-size: 14px; opacity: .92; margin-bottom: 16px; }
+.hero-btn { display: block; width: 100%; padding: 13px; font-size: 16px; font-weight: 700; background: var(--on-accent); color: var(--accent-strong); border: none; border-radius: 12px; cursor: pointer; }
+.hero-btn:active { transform: scale(.99); }
+
+/* 清冰箱区块 */
+.fridge-block { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+.fridge-block h2 { margin: 0 0 2px; font-size: 18px; }
+
 /* 辅助入口 */
 .quick-entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 2px 0 18px; }
 .quick-entry { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
@@ -198,16 +210,38 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 <div class="wrap">
   <header class="top">
     <div class="date" id="dateLine"></div>
-    <h1 id="pageTitle">今晚吃什么</h1>
+    <h1 id="pageTitle">今天吃点什么？</h1>
   </header>
 
-  <nav class="quick-entries" id="quickEntries">
-    <button class="quick-entry" data-view="fridge"><span class="qe-emoji">🥘</span><span class="qe-text">清冰箱</span></button>
-    <button class="quick-entry" data-view="solo"><span class="qe-emoji">🍜</span><span class="qe-text">一人餐</span></button>
-    <button class="quick-entry" data-view="light"><span class="qe-emoji">🥗</span><span class="qe-text">减脂餐</span></button>
-  </nav>
+  <section class="view active" id="view-home">
+    <p class="sub">不知道吃什么？让今天的饭菜安排得明明白白。</p>
 
-  <section class="view active" id="view-dinner">
+    <div class="hero-card">
+      <div class="hero-art">🍚 🥘 🥬</div>
+      <div class="hero-title">今天吃什么</div>
+      <div class="hero-desc">荤菜、素菜、主食、汤，一次搭配好。</div>
+      <button class="hero-btn" id="heroGo">给我安排一顿 →</button>
+    </div>
+
+    <div class="quick-entries" id="quickEntries">
+      <button class="quick-entry" data-view="light"><span class="qe-emoji">🥗</span><span class="qe-text">减脂餐</span></button>
+      <button class="quick-entry" data-view="solo"><span class="qe-emoji">🍜</span><span class="qe-text">一个人吃饭</span></button>
+      <button class="quick-entry" id="toFridge"><span class="qe-emoji">🥘</span><span class="qe-text">清冰箱</span></button>
+    </div>
+
+    <div class="fridge-block">
+      <h2>冰箱里还有啥？</h2>
+      <p class="hint">别浪费食材，看看能做出什么好吃的。</p>
+      <div class="fridge-box">
+        <input type="text" id="fridgeInput" placeholder="比如：西红柿、鸡蛋、青椒、猪肉" autocomplete="off">
+        <button id="fridgeGo">看看能做什么</button>
+      </div>
+      <div id="fridgeResult"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-dinner">
+    <button class="back-btn" data-back="home">← 返回首页</button>
     <p class="sub">给你俩挑了一桌，点开任意一道看食材和做法；不满意就「换一批」。</p>
     <section class="menu" id="menu"></section>
     <button class="reroll" id="reroll">🔁 换一批</button>
@@ -220,24 +254,14 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   </section>
 
   <section class="view" id="view-solo">
-    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
+    <button class="back-btn" data-back="home">← 返回首页</button>
     <p class="sub">一个人也要好好吃饭，但没必要太为难自己。</p>
     <div class="solo-entries" id="soloEntries"></div>
     <div class="solo-card" id="soloResult" hidden></div>
   </section>
 
-  <section class="view" id="view-fridge">
-    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
-    <p class="sub">把冰箱里剩下的食材敲进来，看看能凑出什么菜。</p>
-    <div class="fridge-box">
-      <input type="text" id="fridgeInput" placeholder="比如：西红柿、鸡蛋、青椒、猪肉" autocomplete="off">
-      <button id="fridgeGo">看看能做什么</button>
-    </div>
-    <div id="fridgeResult"></div>
-  </section>
-
   <section class="view" id="view-light">
-    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
+    <button class="back-btn" data-back="home">← 返回首页</button>
     <p class="sub">清淡、均衡的一餐（不标卡路里、不承诺减重效果）。</p>
     <section class="menu" id="lightMenu"></section>
     <button class="reroll" id="lightReroll">🔁 换一桌</button>
@@ -676,19 +700,27 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
     renderMenu(buildLightMenu(), lightMenuEl);
   });
 
-  // ===== 入口切换（主视图 + 辅助入口）=====
-  const VIEW_TITLES = { dinner: "今晚吃什么", fridge: "清冰箱", solo: "一人餐", light: "减脂餐" };
+  // ===== 入口切换（首页 + 功能视图）=====
+  const VIEW_TITLES = { home: "今天吃点什么？", dinner: "今晚吃什么", solo: "一个人吃饭", light: "减脂餐" };
   const pageTitle = document.getElementById("pageTitle");
 
   function switchView(name) {
     document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
     document.getElementById("view-" + name).classList.add("active");
-    pageTitle.textContent = VIEW_TITLES[name] || "今晚吃什么";
+    pageTitle.textContent = VIEW_TITLES[name] || "今天吃点什么？";
     window.scrollTo({ top: 0 });
   }
 
+  document.getElementById("heroGo").addEventListener("click", function () { switchView("dinner"); });
   document.querySelectorAll(".quick-entry").forEach(function (btn) {
-    btn.addEventListener("click", function () { switchView(btn.dataset.view); });
+    btn.addEventListener("click", function () {
+      if (btn.dataset.view) switchView(btn.dataset.view);
+    });
+  });
+  document.getElementById("toFridge").addEventListener("click", function () {
+    const fi = document.getElementById("fridgeInput");
+    fi.scrollIntoView({ behavior: "smooth", block: "center" });
+    fi.focus();
   });
   document.querySelectorAll(".back-btn").forEach(function (btn) {
     btn.addEventListener("click", function () { switchView(btn.dataset.back); });
