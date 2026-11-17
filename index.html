@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>今晚吃什么</title>
+<meta name="theme-color" content="#E2552F">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+/* 设计：温暖家常厨房，番茄红 accent + 分类语义色 */
+:root {
+  --bg: #FDFAF4;
+  --surface: #FFFFFF;
+  --surface-2: #F6EFE3;
+  --fg: #332A24;
+  --muted: #97897C;
+  --line: #EAE0D0;
+  --accent: #E2552F;
+  --accent-strong: #C7431F;
+  --on-accent: #FFFFFF;
+  --meat: #C7502E;
+  --veg: #3F8E5B;
+  --soup: #2F8A85;
+  --staple: #B8860B;
+  --meat-bg: rgba(199,80,46,.12);
+  --veg-bg: rgba(63,142,91,.12);
+  --soup-bg: rgba(47,138,133,.12);
+  --staple-bg: rgba(184,134,11,.12);
+  --shadow: 0 1px 2px rgba(51,42,36,.05), 0 8px 24px rgba(51,42,36,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1E1A17;
+    --surface: #27221E;
+    --surface-2: #2F2923;
+    --fg: #F0E7DC;
+    --muted: #A99A8B;
+    --line: #3A332B;
+    --accent: #FF7A4D;
+    --accent-strong: #FF8F6B;
+    --on-accent: #2B1408;
+    --meat: #E86B4A;
+    --veg: #5CB876;
+    --soup: #4FB3AD;
+    --staple: #D9A93A;
+    --meat-bg: rgba(232,107,74,.16);
+    --veg-bg: rgba(92,184,118,.16);
+    --soup-bg: rgba(79,179,173,.16);
+    --staple-bg: rgba(217,169,58,.16);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1E1A17;
+  --surface: #27221E;
+  --surface-2: #2F2923;
+  --fg: #F0E7DC;
+  --muted: #A99A8B;
+  --line: #3A332B;
+  --accent: #FF7A4D;
+  --accent-strong: #FF8F6B;
+  --on-accent: #2B1408;
+  --meat: #E86B4A;
+  --veg: #5CB876;
+  --soup: #4FB3AD;
+  --staple: #D9A93A;
+  --meat-bg: rgba(232,107,74,.16);
+  --veg-bg: rgba(92,184,118,.16);
+  --soup-bg: rgba(79,179,173,.16);
+  --staple-bg: rgba(217,169,58,.16);
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 520px; margin: 0 auto; }
+
+/* 顶部 */
+.top { padding: 8px 2px 20px; }
+.date { font-size: 13px; color: var(--muted); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01em; text-wrap: balance; }
+.sub { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* 菜单卡片 */
+.menu { display: grid; gap: 10px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-head {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 16px; background: none; border: none; cursor: pointer;
+  font: inherit; color: var(--fg); text-align: left;
+}
+.card-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.badge {
+  flex: 0 0 auto; font-size: 12.5px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.cat-soup .badge { background: var(--soup-bg); color: var(--soup); }
+.cat-meat .badge { background: var(--meat-bg); color: var(--meat); }
+.cat-veg  .badge { background: var(--veg-bg);  color: var(--veg); }
+.cat-staple .badge { background: var(--staple-bg); color: var(--staple); }
+.dish-name { flex: 1 1 auto; font-size: 17px; font-weight: 700; min-width: 0; }
+.chev { flex: 0 0 auto; color: var(--muted); font-size: 14px; transition: transform .2s; }
+.card.open .chev { transform: rotate(180deg); }
+
+.card-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+.card-body section { padding-top: 14px; }
+.sec-label { font-size: 12.5px; font-weight: 800; color: var(--muted); letter-spacing: .04em; margin: 0 0 8px; }
+.ing-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ing-list li { font-size: 14px; background: var(--surface-2); border-radius: 8px; padding: 4px 10px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: s; }
+.steps li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.steps li::before {
+  counter-increment: s; content: counter(s);
+  position: absolute; left: 0; top: 2px; width: 20px; height: 20px;
+  background: var(--surface-2); color: var(--muted); border-radius: 50%;
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+/* 换一批 */
+.reroll {
+  display: block; width: 100%; margin: 18px 0 6px; padding: 13px;
+  background: var(--accent); color: var(--on-accent);
+  border: none; border-radius: 14px; font: inherit; font-size: 16px; font-weight: 700;
+  cursor: pointer; box-shadow: var(--shadow);
+}
+.reroll:active { transform: scale(.99); }
+.reroll:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+
+/* 买菜清单 */
+.shopping { margin-top: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+.shopping h2 { margin: 0 0 4px; font-size: 18px; }
+.shopping .hint { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+.shop-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.shop-list li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+.shop-list li:last-child { border-bottom: none; }
+.shop-list input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--accent); cursor: pointer; }
+.shop-list label { font-size: 15px; cursor: pointer; flex: 1 1 auto; }
+.shop-list input:checked + label { text-decoration: line-through; color: var(--muted); }
+.progress { font-size: 13px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="date" id="dateLine"></div>
+    <h1>今晚吃什么</h1>
+    <p class="sub">给你俩挑了一桌，点开任意一道看食材和做法；不满意就「换一批」。</p>
+  </header>
+
+  <section class="menu" id="menu"></section>
+
+  <button class="reroll" id="reroll">🔁 换一批</button>
+
+  <section class="shopping" id="shopping">
+    <h2>🛒 今晚买菜清单</h2>
+    <p class="hint">勾选买好的，剩下的照着买。</p>
+    <ul class="shop-list" id="shopList"></ul>
+    <p class="progress" id="progress"></p>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // —— 家常菜谱库 ——
+  const RECIPES = [
+    // 荤菜
+    { name: "青椒肉丝", cat: "meat", time: "15分钟", ing: ["青椒 2个", "猪里脊 200g", "蒜 2瓣", "生抽", "淀粉", "盐"], steps: ["肉丝加生抽、淀粉抓匀腌10分钟", "热油下肉丝滑散盛出", "下青椒丝炒至断生", "肉丝回锅加盐翻炒出锅"] },
+    { name: "番茄炒蛋", cat: "meat", time: "10分钟", ing: ["番茄 2个", "鸡蛋 3个", "葱", "白糖", "盐"], steps: ["鸡蛋打散炒至凝固盛出", "番茄切块下锅炒出汁", "倒回鸡蛋加糖、盐翻匀"] },
+    { name: "红烧排骨", cat: "meat", time: "40分钟", ing: ["排骨 500g", "姜", "葱", "冰糖", "生抽", "老抽", "料酒"], steps: ["排骨冷水下锅焯水去沫", "炒糖色下排骨裹匀", "加生抽老抽料酒和热水没过", "小火焖30分钟收汁"] },
+    { name: "可乐鸡翅", cat: "meat", time: "25分钟", ing: ["鸡翅中 8个", "可乐 1罐", "姜", "生抽", "料酒"], steps: ["鸡翅两面划刀焯水", "煎至两面金黄", "倒可乐加生抽姜片", "中火焖至收汁"] },
+    { name: "土豆炖牛肉", cat: "meat", time: "60分钟", ing: ["牛肉 400g", "土豆 2个", "胡萝卜 1根", "葱姜", "八角", "生抽", "料酒"], steps: ["牛肉切块焯水", "爆香葱姜八角下牛肉翻炒", "加生抽料酒和热水炖40分钟", "下土豆胡萝卜再炖20分钟"] },
+    { name: "鱼香肉丝", cat: "meat", time: "20分钟", ing: ["猪里脊 200g", "木耳", "胡萝卜", "青椒", "豆瓣酱", "糖", "醋", "生抽", "蒜"], steps: ["肉丝加生抽淀粉腌10分钟", "调鱼香汁：糖醋生抽各1勺", "炒肉丝盛出，炒香豆瓣酱蒜末", "下配菜和肉丝，淋汁翻炒收汁"] },
+    { name: "宫保鸡丁", cat: "meat", time: "20分钟", ing: ["鸡胸肉 250g", "花生米 1把", "干辣椒", "黄瓜", "生抽", "糖", "醋", "葱蒜"], steps: ["鸡丁加生抽淀粉腌10分钟", "调糖醋汁备用", "炒鸡丁盛出，爆香干辣椒葱蒜", "回锅淋汁，下花生米黄瓜丁翻匀"] },
+    { name: "糖醋里脊", cat: "meat", time: "25分钟", ing: ["猪里脊 300g", "鸡蛋 1个", "淀粉", "番茄酱", "糖", "醋"], steps: ["里脊切条加蛋液淀粉裹匀", "油炸至金黄捞出", "炒香番茄酱加糖醋和水", "下肉条裹匀酱汁"] },
+    { name: "回锅肉", cat: "meat", time: "25分钟", ing: ["五花肉 300g", "蒜苗", "豆瓣酱", "豆豉", "青椒", "姜"], steps: ["五花肉整块煮20分钟切片", "下锅煸出油至微卷", "下豆瓣酱豆豉炒出红油", "下蒜苗青椒炒至断生"] },
+    { name: "蒜苔炒肉", cat: "meat", time: "15分钟", ing: ["蒜苔 1把", "五花肉 150g", "生抽", "姜", "盐"], steps: ["五花肉切薄片煸出油", "下蒜苔翻炒", "加生抽盐炒熟出锅"] },
+    { name: "木须肉", cat: "meat", time: "20分钟", ing: ["猪里脊 150g", "鸡蛋 2个", "木耳", "黄瓜", "黄花菜", "生抽", "盐"], steps: ["鸡蛋炒散盛出，肉片滑熟盛出", "炒木耳黄瓜黄花菜", "倒回肉片鸡蛋加生抽盐翻匀"] },
+    { name: "清蒸鲈鱼", cat: "meat", time: "20分钟", ing: ["鲈鱼 1条", "姜", "葱", "蒸鱼豉油", "料酒"], steps: ["鲈鱼洗净划刀，铺姜丝淋料酒", "水开蒸8分钟", "倒掉汤汁铺葱丝", "淋蒸鱼豉油，浇热油激香"] },
+    { name: "白灼虾", cat: "meat", time: "10分钟", ing: ["鲜虾 400g", "姜", "葱", "生抽", "料酒"], steps: ["虾去虾线，水开下姜葱料酒", "煮2分钟变红捞出", "配生抽蘸食"] },
+    { name: "红烧肉", cat: "meat", time: "70分钟", ing: ["五花肉 500g", "冰糖", "生抽", "老抽", "姜", "八角"], steps: ["五花肉切块焯水", "炒糖色下肉裹匀", "加生抽老抽八角热水", "小火炖50分钟收汁"] },
+    { name: "辣子鸡丁", cat: "meat", time: "25分钟", ing: ["鸡腿肉 300g", "干辣椒", "花椒", "葱姜蒜", "生抽", "盐"], steps: ["鸡丁加生抽盐腌10分钟", "油炸至金黄捞出", "爆香干辣椒花椒葱姜蒜", "下鸡丁翻炒入味"] },
+
+    // 素菜
+    { name: "蒜蓉西兰花", cat: "veg", time: "10分钟", ing: ["西兰花 1颗", "蒜 4瓣", "蚝油", "盐"], steps: ["西兰花掰小朵焯水1分钟", "爆香蒜末", "下西兰花加蚝油盐炒匀"] },
+    { name: "醋溜白菜", cat: "veg", time: "10分钟", ing: ["大白菜 半颗", "醋", "糖", "蒜", "干辣椒", "盐"], steps: ["白菜帮叶分开切", "爆香蒜末干辣椒下白菜帮", "加醋糖盐，下叶子炒软"] },
+    { name: "麻婆豆腐", cat: "veg", time: "15分钟", ing: ["豆腐 1块", "肉末 50g", "豆瓣酱", "花椒", "蒜", "淀粉"], steps: ["豆腐切块焯水", "炒肉末加豆瓣酱蒜末出红油", "下豆腐轻推，加水煮3分钟", "勾芡撒花椒出锅"] },
+    { name: "家常豆腐", cat: "veg", time: "15分钟", ing: ["豆腐 1块", "青椒", "木耳", "豆瓣酱", "生抽"], steps: ["豆腐切厚片煎至两面金黄", "炒豆瓣酱加青椒木耳", "下豆腐加生抽水焖2分钟"] },
+    { name: "酸辣土豆丝", cat: "veg", time: "10分钟", ing: ["土豆 2个", "醋", "干辣椒", "花椒", "盐"], steps: ["土豆切丝泡水去淀粉", "爆香干辣椒花椒", "下土豆丝大火快炒，沿锅边淋醋加盐"] },
+    { name: "清炒藕片", cat: "veg", time: "10分钟", ing: ["莲藕 1节", "蒜", "白醋", "盐"], steps: ["藕切片泡水防黑", "爆香蒜末下藕片", "大火快炒，淋白醋加盐"] },
+    { name: "凉拌黄瓜", cat: "veg", time: "8分钟", ing: ["黄瓜 2根", "蒜", "醋", "生抽", "香油"], steps: ["黄瓜拍碎切段", "加蒜末醋生抽香油", "拌匀腌制5分钟"] },
+    { name: "蒜蓉油麦菜", cat: "veg", time: "8分钟", ing: ["油麦菜 1把", "蒜 4瓣", "蚝油", "盐"], steps: ["油麦菜切段", "爆香蒜末", "下油麦菜大火快炒，加蚝油盐"] },
+    { name: "红烧茄子", cat: "veg", time: "20分钟", ing: ["茄子 2根", "蒜", "生抽", "糖", "盐"], steps: ["茄子切滚刀块盐腌10分钟挤水", "油炸至软捞出", "蒜末炒香加生抽糖水", "下茄子焖2分钟收汁"] },
+    { name: "香菇青菜", cat: "veg", time: "12分钟", ing: ["香菇 6朵", "上海青 4棵", "蒜", "蚝油", "盐"], steps: ["香菇切片，青菜对半切", "爆香蒜末下香菇炒软", "下青菜加蚝油盐炒熟"] },
+    { name: "清炒豆芽", cat: "veg", time: "8分钟", ing: ["绿豆芽 300g", "蒜", "醋", "盐"], steps: ["爆香蒜末", "下豆芽大火快炒", "淋醋加盐出锅"] },
+    { name: "地三鲜", cat: "veg", time: "25分钟", ing: ["土豆 1个", "茄子 1根", "青椒 1个", "蒜", "生抽", "糖", "淀粉"], steps: ["土豆茄子切块油炸至金黄", "青椒过油", "蒜末炒香加生抽糖水淀粉", "下三样翻匀收汁"] },
+    { name: "干煸豆角", cat: "veg", time: "20分钟", ing: ["豆角 300g", "肉末 50g", "干辣椒", "蒜", "盐"], steps: ["豆角切段炸至起皱捞出", "炒肉末加干辣椒蒜末", "下豆角加盐翻炒"] },
+    { name: "清炒荷兰豆", cat: "veg", time: "8分钟", ing: ["荷兰豆 200g", "蒜", "盐"], steps: ["荷兰豆去筋焯水", "爆香蒜末下荷兰豆", "加盐快炒出锅"] },
+    { name: "虎皮青椒", cat: "veg", time: "12分钟", ing: ["青椒 4个", "蒜", "生抽", "醋", "糖", "盐"], steps: ["青椒去籽压扁", "干锅煎至两面虎皮", "蒜末炒香加生抽醋糖盐", "下青椒翻匀"] },
+
+    // 清淡/汤
+    { name: "冬瓜虾仁汤", cat: "soup", time: "15分钟", ing: ["冬瓜 300g", "虾仁 150g", "姜", "盐", "葱花"], steps: ["冬瓜切薄片，虾仁去虾线", "水开下姜片冬瓜煮5分钟", "下虾仁煮2分钟，加盐撒葱花"] },
+    { name: "紫菜蛋花汤", cat: "soup", time: "8分钟", ing: ["紫菜", "鸡蛋 2个", "虾皮", "葱", "盐", "香油"], steps: ["水开下紫菜虾皮", "淋入打散的蛋液成蛋花", "加盐香油撒葱花"] },
+    { name: "番茄蛋花汤", cat: "soup", time: "10分钟", ing: ["番茄 2个", "鸡蛋 2个", "葱", "盐"], steps: ["番茄炒出汁加水煮开", "淋蛋液成蛋花", "加盐撒葱花"] },
+    { name: "青菜豆腐汤", cat: "soup", time: "10分钟", ing: ["小青菜 1把", "豆腐 1块", "盐", "香油"], steps: ["豆腐切块，水开下豆腐煮3分钟", "下青菜烫熟", "加盐香油出锅"] },
+    { name: "萝卜排骨汤", cat: "soup", time: "50分钟", ing: ["白萝卜 1根", "排骨 400g", "姜", "盐"], steps: ["排骨焯水去沫", "加姜片炖30分钟", "下白萝卜再炖20分钟加盐"] },
+    { name: "玉米排骨汤", cat: "soup", time: "50分钟", ing: ["甜玉米 2根", "排骨 400g", "姜", "盐"], steps: ["排骨焯水，玉米切段", "加姜片一起炖40分钟", "加盐调味"] },
+    { name: "酸辣汤", cat: "soup", time: "15分钟", ing: ["豆腐", "木耳", "鸡蛋 1个", "醋", "白胡椒粉", "淀粉", "盐"], steps: ["豆腐木耳切丝，水开下锅", "加醋白胡椒盐", "勾芡淋蛋液成蛋花"] },
+    { name: "冬瓜排骨汤", cat: "soup", time: "50分钟", ing: ["冬瓜 300g", "排骨 400g", "姜", "盐"], steps: ["排骨焯水炖30分钟", "下冬瓜片再炖15分钟", "加盐调味"] },
+    { name: "丝瓜蛋汤", cat: "soup", time: "10分钟", ing: ["丝瓜 1根", "鸡蛋 2个", "盐", "香油"], steps: ["丝瓜切片炒软", "加水煮开淋蛋液", "加盐香油出锅"] },
+    { name: "海带豆腐汤", cat: "soup", time: "15分钟", ing: ["海带", "豆腐 1块", "盐", "葱花"], steps: ["海带洗净切段煮10分钟", "下豆腐再煮3分钟", "加盐撒葱花"] },
+
+    // 主食
+    { name: "米饭", cat: "staple", time: "30分钟", ing: ["大米 2杯"], steps: ["大米淘洗两遍", "加水没过一指节", "电饭煲煮饭键蒸熟"] },
+    { name: "馒头", cat: "staple", time: "20分钟", ing: ["馒头 4个"], steps: ["馒头摆蒸屉", "水开蒸10分钟", "关火焖2分钟"] },
+    { name: "青菜鸡蛋面", cat: "staple", time: "15分钟", ing: ["面条 2把", "小青菜", "鸡蛋 2个", "生抽", "盐"], steps: ["煎两个荷包蛋", "水开下面条煮至八分熟", "下青菜，加生抽盐调味"] },
+    { name: "葱油拌面", cat: "staple", time: "15分钟", ing: ["面条 2把", "小葱 1把", "生抽", "老抽", "糖", "油"], steps: ["小葱切段小火熬至焦黄成葱油", "加生抽老抽糖调汁", "面条煮熟捞出拌入葱油汁"] },
+    { name: "饺子", cat: "staple", time: "20分钟", ing: ["速冻饺子 40个"], steps: ["水开下饺子", "点三次凉水至浮起", "捞出配醋蒜"] },
+    { name: "包子", cat: "staple", time: "20分钟", ing: ["速冻包子 6个"], steps: ["包子摆蒸屉", "水开蒸15分钟", "关火焖3分钟"] },
+    { name: "烙饼", cat: "staple", time: "25分钟", ing: ["面粉 300g", "温水", "油", "盐"], steps: ["面粉加温水和成软面团醒20分钟", "擀薄刷油撒盐卷起再擀开", "平底锅烙至两面金黄"] },
+    { name: "小米粥", cat: "staple", time: "30分钟", ing: ["小米 1杯"], steps: ["小米淘洗", "加水煮开后小火熬20分钟", "熬至浓稠"] },
+    { name: "蛋炒饭", cat: "staple", time: "10分钟", ing: ["米饭 2碗", "鸡蛋 2个", "葱", "生抽", "盐"], steps: ["鸡蛋炒散盛出", "下米饭炒散", "倒回鸡蛋加葱生抽盐炒匀"] },
+    { name: "蒸红薯玉米", cat: "staple", time: "25分钟", ing: ["红薯 2个", "玉米 2根"], steps: ["红薯玉米洗净", "上蒸屉水开蒸20分钟", "筷子能扎透即可"] }
+  ];
+
+  const CATS = [
+    { key: "soup", label: "🥬 清淡汤", color: "var(--soup)" },
+    { key: "meat", label: "🥩 荤菜", color: "var(--meat)" },
+    { key: "veg", label: "🥗 素菜", color: "var(--veg)" },
+    { key: "staple", label: "🍚 主食", color: "var(--staple)" }
+  ];
+
+  // —— 工具 ——
+  function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function todayStr() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+
+  const store = {
+    get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } },
+    set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  };
+
+  // 最近 7 天吃过的菜名（用于换样）
+  function loadRecent() {
+    const rec = store.get("recent", []);
+    const today = todayStr();
+    return rec.filter(x => x.date === today || (Date.now() - new Date(x.date).getTime()) < 7 * 86400000)
+              .map(x => x.name);
+  }
+
+  function pick(cat, rnd, avoid) {
+    const pool = RECIPES.filter(r => r.cat === cat);
+    let cand = pool.filter(r => avoid.indexOf(r.name) === -1);
+    if (cand.length === 0) cand = pool;
+    return cand[Math.floor(rnd() * cand.length)];
+  }
+
+  // 生成菜单
+  function buildMenu() {
+    const saved = store.get("menu_" + todayStr(), null);
+    if (saved) return saved;
+
+    const avoid = loadRecent();
+    const seed = hashStr(todayStr());
+    const rnd = mulberry32(seed);
+    const menu = {};
+    CATS.forEach(c => { menu[c.key] = pick(c.key, rnd, avoid); });
+
+    store.set("menu_" + todayStr(), menu);
+    // 记录今天吃过的
+    const rec = store.get("recent", []);
+    CATS.forEach(c => rec.push({ date: todayStr(), name: menu[c.key].name }));
+    store.set("recent", rec);
+    return menu;
+  }
+
+  function reroll() {
+    const avoid = loadRecent();
+    const rnd = mulberry32(Date.now() & 0xffffffff);
+    const menu = {};
+    CATS.forEach(c => { menu[c.key] = pick(c.key, rnd, avoid); });
+    store.set("menu_" + todayStr(), menu);
+    render(menu);
+  }
+
+  // 汇总食材（去重，保持顺序）
+  function collectIngredients(menu) {
+    const seen = new Set();
+    const list = [];
+    CATS.forEach(c => {
+      (menu[c.key].ing || []).forEach(it => {
+        if (!seen.has(it)) { seen.add(it); list.push(it); }
+      });
+    });
+    return list;
+  }
+
+  // —— 渲染 ——
+  const menuEl = document.getElementById("menu");
+  const shopListEl = document.getElementById("shopList");
+  const progressEl = document.getElementById("progress");
+
+  function render(menu) {
+    // 日期行
+    const d = new Date();
+    const week = "日一二三四五六"[d.getDay()];
+    document.getElementById("dateLine").textContent =
+      (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + week;
+
+    // 菜单卡片
+    menuEl.innerHTML = "";
+    CATS.forEach(c => {
+      const dish = menu[c.key];
+      const art = document.createElement("article");
+      art.className = "card cat-" + c.key;
+
+      const head = document.createElement("button");
+      head.className = "card-head";
+      head.innerHTML =
+        '<span class="badge">' + c.label + "</span>" +
+        '<span class="dish-name">' + dish.name + "</span>" +
+        '<span class="chev">▾</span>';
+      head.addEventListener("click", () => {
+        const open = art.classList.toggle("open");
+        body.hidden = !open;
+      });
+
+      const body = document.createElement("div");
+      body.className = "card-body";
+      body.hidden = true;
+      body.innerHTML =
+        '<section><p class="sec-label">🛒 食材</p><ul class="ing-list">' +
+        dish.ing.map(i => "<li>" + i + "</li>").join("") +
+        "</ul></section>" +
+        '<section><p class="sec-label">🍳 做法（约' + dish.time + "）</p><ol class=\"steps\">" +
+        dish.steps.map(s => "<li>" + s + "</li>").join("") +
+        "</ol></section>";
+
+      art.appendChild(head);
+      art.appendChild(body);
+      menuEl.appendChild(art);
+    });
+
+    // 买菜清单
+    const ings = collectIngredients(menu);
+    const checked = store.get("checked", {});
+    shopListEl.innerHTML = "";
+    ings.forEach(it => {
+      const li = document.createElement("li");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = "chk_" + it.replace(/[^一-龥a-zA-Z0-9]/g, "");
+      input.checked = !!checked[it];
+      input.addEventListener("change", () => {
+        checked[it] = input.checked;
+        store.set("checked", checked);
+        updateProgress();
+      });
+      const label = document.createElement("label");
+      label.htmlFor = input.id;
+      label.textContent = it;
+      li.appendChild(input);
+      li.appendChild(label);
+      shopListEl.appendChild(li);
+    });
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = shopListEl.children.length;
+    const done = Array.from(shopListEl.querySelectorAll("input")).filter(i => i.checked).length;
+    progressEl.textContent = "已买 " + done + " / " + total + " 样";
+  }
+
+  document.getElementById("reroll").addEventListener("click", reroll);
+
+  render(buildMenu());
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>
