@@ -679,13 +679,13 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
     return r.cat === "veg";
   }
 
-  function buildLightMenu() {
+  function buildLightMenu(seed) {
     const lightPool = RECIPES.filter(isLight);
     const soupPool = lightPool.filter(function (r) { return r.cat === "soup"; });
     const vegPool = lightPool.filter(function (r) { return r.cat === "veg"; });
     const meatPool = lightPool.filter(function (r) { return r.cat === "meat"; });
     const staplePool = RECIPES.filter(function (r) { return r.cat === "staple"; });
-    const rnd = mulberry32(hashStr(todayStr()) ^ 0x9e3779b9);
+    const rnd = mulberry32(typeof seed === "number" ? seed : (hashStr(todayStr()) ^ 0x9e3779b9));
     function pickOne(pool) { return pool[Math.floor(rnd() * pool.length)]; }
     return {
       soup: pickOne(soupPool.length ? soupPool : lightPool),
@@ -697,7 +697,7 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 
   renderMenu(buildLightMenu(), lightMenuEl);
   document.getElementById("lightReroll").addEventListener("click", function () {
-    renderMenu(buildLightMenu(), lightMenuEl);
+    renderMenu(buildLightMenu(Date.now() & 0xffffffff), lightMenuEl);
   });
 
   // ===== 入口切换（首页 + 功能视图）=====
