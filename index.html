@@ -205,6 +205,7 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 .have { color: var(--veg); }
 .lack { color: var(--meat); }
 .fridge-empty { font-size: 14px; color: var(--muted); text-align: center; padding: 20px 0; }
+.fat-note { font-size: 13px; color: var(--veg); margin: 12px 0 0; font-weight: 600; }
 </style>
 
 <div class="wrap">
@@ -262,7 +263,7 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 
   <section class="view" id="view-light">
     <button class="back-btn" data-back="home">← 返回首页</button>
-    <p class="sub">清淡、均衡的一餐（不标卡路里、不承诺减重效果）。</p>
+    <p class="sub">按「低油、高蛋白、多蔬菜」的减脂原则挑选，每道菜标了减脂点，仅供参考。</p>
     <section class="menu" id="lightMenu"></section>
     <button class="reroll" id="lightReroll">🔁 换一桌</button>
   </section>
@@ -454,7 +455,7 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   const shopListEl = document.getElementById("shopList");
   const progressEl = document.getElementById("progress");
 
-  function renderMenu(menu, container) {
+  function renderMenu(menu, container, noteFn) {
     container.innerHTML = "";
     CATS.forEach(c => {
       const dish = menu[c.key];
@@ -472,13 +473,14 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
       const body = document.createElement("div");
       body.className = "card-body";
       body.hidden = true;
+      const noteHtml = noteFn ? '<p class="fat-note">💡 ' + noteFn(dish) + "</p>" : "";
       body.innerHTML =
         '<section><p class="sec-label">🛒 食材</p><ul class="ing-list">' +
         dish.ing.map(i => "<li>" + i + "</li>").join("") +
         "</ul></section>" +
         '<section><p class="sec-label">🍳 做法（约' + dish.time + "）</p><ol class=\"steps\">" +
         dish.steps.map(s => "<li>" + s + "</li>").join("") +
-        "</ol></section>";
+        "</ol></section>" + noteHtml;
 
       head.addEventListener("click", () => {
         const open = art.classList.toggle("open");
@@ -671,20 +673,31 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   // ===== 减脂餐 =====
   const lightMenuEl = document.getElementById("lightMenu");
 
-  function isLight(r) {
-    if (r.cat === "soup") return true;
+  function isFatLoss(r) {
     const n = r.name;
-    if (/红烧|糖醋|回锅|干煸|辣子|水煮|油炸|咖喱|焖|炸/.test(n)) return false;
-    if (/清蒸|白灼|清炒|凉拌|蒜蓉|汤|蒸|煮|焯/.test(n)) return true;
-    return r.cat === "veg";
+    if (r.cat === "staple") return /米饭|粥|玉米|红薯|紫薯/.test(n);
+    if (r.cat === "soup") return true;
+    if (/红烧|糖醋|可乐|回锅|辣子|水煮|咖喱|黄焖|京酱|煎|炸|孜然|烙|葱油|炒饭|手抓饼/.test(n)) return false;
+    return true;
+  }
+
+  function fatLossNote(r) {
+    const n = r.name;
+    if (r.cat === "soup") return "低热量、水分足、饱腹感强";
+    if (r.cat === "staple") return /玉米|红薯|紫薯|粥/.test(n) ? "粗粮或粥，比精制主食更抗饿" : "主食适量，控制分量";
+    if (/清蒸|白灼|蒸/.test(n)) return "高蛋白低脂，无油或少油烹饪";
+    if (/凉拌/.test(n)) return "少油凉拌，清爽低卡";
+    if (r.cat === "veg") return "蔬菜纤维足、热量低";
+    if (/炒/.test(n)) return "家常快炒，少油更友好";
+    return "清淡做法，少油高蛋白";
   }
 
   function buildLightMenu(seed) {
-    const lightPool = RECIPES.filter(isLight);
+    const lightPool = RECIPES.filter(isFatLoss);
     const soupPool = lightPool.filter(function (r) { return r.cat === "soup"; });
     const vegPool = lightPool.filter(function (r) { return r.cat === "veg"; });
     const meatPool = lightPool.filter(function (r) { return r.cat === "meat"; });
-    const staplePool = RECIPES.filter(function (r) { return r.cat === "staple"; });
+    const staplePool = lightPool.filter(function (r) { return r.cat === "staple"; });
     const rnd = mulberry32(typeof seed === "number" ? seed : (hashStr(todayStr()) ^ 0x9e3779b9));
     function pickOne(pool) { return pool[Math.floor(rnd() * pool.length)]; }
     return {
@@ -695,9 +708,9 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
     };
   }
 
-  renderMenu(buildLightMenu(), lightMenuEl);
+  renderMenu(buildLightMenu(), lightMenuEl, fatLossNote);
   document.getElementById("lightReroll").addEventListener("click", function () {
-    renderMenu(buildLightMenu(Date.now() & 0xffffffff), lightMenuEl);
+    renderMenu(buildLightMenu(Date.now() & 0xffffffff), lightMenuEl, fatLossNote);
   });
 
   // ===== 入口切换（首页 + 功能视图）=====
