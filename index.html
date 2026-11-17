@@ -157,10 +157,13 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 .shop-list input:checked + label { text-decoration: line-through; color: var(--muted); }
 .progress { font-size: 13px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
 
-/* 顶部导航 */
-.tabs { display: flex; gap: 8px; margin: 2px 0 18px; }
-.tab { flex: 1; padding: 9px 4px; font-size: 14px; font-weight: 600; background: var(--surface); color: var(--muted); border: 1px solid var(--line); border-radius: 11px; cursor: pointer; white-space: nowrap; }
-.tab.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+/* 辅助入口 */
+.quick-entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 2px 0 18px; }
+.quick-entry { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+.quick-entry:active { transform: scale(.98); }
+.qe-emoji { font-size: 22px; }
+.qe-text { font-size: 13px; font-weight: 600; color: var(--fg); }
+.back-btn { display: inline-block; margin: 0 0 10px; padding: 6px 12px; font-size: 13px; font-weight: 600; background: var(--surface-2); color: var(--muted); border: none; border-radius: 9px; cursor: pointer; }
 .view { display: none; }
 .view.active { display: block; }
 
@@ -195,14 +198,13 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 <div class="wrap">
   <header class="top">
     <div class="date" id="dateLine"></div>
-    <h1>今晚吃什么</h1>
+    <h1 id="pageTitle">今晚吃什么</h1>
   </header>
 
-  <nav class="tabs" id="tabs">
-    <button class="tab active" data-view="dinner">今晚吃啥</button>
-    <button class="tab" data-view="solo">一人餐</button>
-    <button class="tab" data-view="fridge">清冰箱</button>
-    <button class="tab" data-view="light">减脂餐</button>
+  <nav class="quick-entries" id="quickEntries">
+    <button class="quick-entry" data-view="fridge"><span class="qe-emoji">🥘</span><span class="qe-text">清冰箱</span></button>
+    <button class="quick-entry" data-view="solo"><span class="qe-emoji">🍜</span><span class="qe-text">一人餐</span></button>
+    <button class="quick-entry" data-view="light"><span class="qe-emoji">🥗</span><span class="qe-text">减脂餐</span></button>
   </nav>
 
   <section class="view active" id="view-dinner">
@@ -218,12 +220,14 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   </section>
 
   <section class="view" id="view-solo">
+    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
     <p class="sub">一个人也要好好吃饭，但没必要太为难自己。</p>
     <div class="solo-entries" id="soloEntries"></div>
     <div class="solo-card" id="soloResult" hidden></div>
   </section>
 
   <section class="view" id="view-fridge">
+    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
     <p class="sub">把冰箱里剩下的食材敲进来，看看能凑出什么菜。</p>
     <div class="fridge-box">
       <input type="text" id="fridgeInput" placeholder="比如：西红柿、鸡蛋、青椒、猪肉" autocomplete="off">
@@ -233,6 +237,7 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   </section>
 
   <section class="view" id="view-light">
+    <button class="back-btn" data-back="dinner">← 回今晚吃啥</button>
     <p class="sub">清淡、均衡的一餐（不标卡路里、不承诺减重效果）。</p>
     <section class="menu" id="lightMenu"></section>
     <button class="reroll" id="lightReroll">🔁 换一桌</button>
@@ -671,15 +676,22 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
     renderMenu(buildLightMenu(), lightMenuEl);
   });
 
-  // ===== 顶部 tab 切换 =====
-  const tabs = document.querySelectorAll(".tab");
-  tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      tabs.forEach(function (t) { t.classList.remove("active"); });
-      tab.classList.add("active");
-      document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
-      document.getElementById("view-" + tab.dataset.view).classList.add("active");
-    });
+  // ===== 入口切换（主视图 + 辅助入口）=====
+  const VIEW_TITLES = { dinner: "今晚吃什么", fridge: "清冰箱", solo: "一人餐", light: "减脂餐" };
+  const pageTitle = document.getElementById("pageTitle");
+
+  function switchView(name) {
+    document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+    document.getElementById("view-" + name).classList.add("active");
+    pageTitle.textContent = VIEW_TITLES[name] || "今晚吃什么";
+    window.scrollTo({ top: 0 });
+  }
+
+  document.querySelectorAll(".quick-entry").forEach(function (btn) {
+    btn.addEventListener("click", function () { switchView(btn.dataset.view); });
+  });
+  document.querySelectorAll(".back-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () { switchView(btn.dataset.back); });
   });
 })();
 </script>
