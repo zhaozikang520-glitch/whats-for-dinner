@@ -156,24 +156,86 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
 .shop-list label { font-size: 15px; cursor: pointer; flex: 1 1 auto; }
 .shop-list input:checked + label { text-decoration: line-through; color: var(--muted); }
 .progress { font-size: 13px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
+
+/* 顶部导航 */
+.tabs { display: flex; gap: 8px; margin: 2px 0 18px; }
+.tab { flex: 1; padding: 9px 4px; font-size: 14px; font-weight: 600; background: var(--surface); color: var(--muted); border: 1px solid var(--line); border-radius: 11px; cursor: pointer; white-space: nowrap; }
+.tab.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* 一人餐 */
+.solo-entries { display: grid; gap: 10px; }
+.solo-entry { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; cursor: pointer; box-shadow: var(--shadow); }
+.solo-entry:active { transform: scale(.99); }
+.solo-emoji { font-size: 26px; }
+.solo-title { font-size: 17px; font-weight: 700; margin: 6px 0 2px; }
+.solo-desc { font-size: 13.5px; color: var(--muted); }
+.solo-card { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+.solo-card .tagline { font-size: 15px; font-weight: 700; color: var(--accent); margin: 0 0 12px; }
+.solo-card .idea { font-size: 19px; font-weight: 800; margin: 0 0 6px; }
+.solo-card .idea-desc { font-size: 15px; line-height: 1.7; }
+.again { margin-top: 14px; padding: 9px 16px; font-size: 14px; font-weight: 600; background: var(--surface-2); color: var(--fg); border: none; border-radius: 10px; cursor: pointer; }
+
+/* 清冰箱 */
+.fridge-box { display: flex; gap: 8px; margin-bottom: 14px; }
+.fridge-box input { flex: 1; padding: 12px 14px; font-size: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--fg); min-width: 0; }
+.fridge-box input:focus { outline: 2px solid var(--accent); }
+.fridge-box button { padding: 12px 16px; font-size: 15px; font-weight: 700; background: var(--accent); color: var(--on-accent); border: none; border-radius: 12px; cursor: pointer; white-space: nowrap; }
+.match-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.match-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.match-name { font-size: 16px; font-weight: 700; }
+.match-pct { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.match-lines { font-size: 13.5px; margin-top: 6px; line-height: 1.7; }
+.have { color: var(--veg); }
+.lack { color: var(--meat); }
+.fridge-empty { font-size: 14px; color: var(--muted); text-align: center; padding: 20px 0; }
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="date" id="dateLine"></div>
     <h1>今晚吃什么</h1>
-    <p class="sub">给你俩挑了一桌，点开任意一道看食材和做法；不满意就「换一批」。</p>
   </header>
 
-  <section class="menu" id="menu"></section>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="dinner">今晚吃啥</button>
+    <button class="tab" data-view="solo">一人餐</button>
+    <button class="tab" data-view="fridge">清冰箱</button>
+    <button class="tab" data-view="light">减脂餐</button>
+  </nav>
 
-  <button class="reroll" id="reroll">🔁 换一批</button>
+  <section class="view active" id="view-dinner">
+    <p class="sub">给你俩挑了一桌，点开任意一道看食材和做法；不满意就「换一批」。</p>
+    <section class="menu" id="menu"></section>
+    <button class="reroll" id="reroll">🔁 换一批</button>
+    <section class="shopping" id="shopping">
+      <h2>🛒 今晚买菜清单</h2>
+      <p class="hint">勾选买好的，剩下的照着买。</p>
+      <ul class="shop-list" id="shopList"></ul>
+      <p class="progress" id="progress"></p>
+    </section>
+  </section>
 
-  <section class="shopping" id="shopping">
-    <h2>🛒 今晚买菜清单</h2>
-    <p class="hint">勾选买好的，剩下的照着买。</p>
-    <ul class="shop-list" id="shopList"></ul>
-    <p class="progress" id="progress"></p>
+  <section class="view" id="view-solo">
+    <p class="sub">一个人也要好好吃饭，但没必要太为难自己。</p>
+    <div class="solo-entries" id="soloEntries"></div>
+    <div class="solo-card" id="soloResult" hidden></div>
+  </section>
+
+  <section class="view" id="view-fridge">
+    <p class="sub">把冰箱里剩下的食材敲进来，看看能凑出什么菜。</p>
+    <div class="fridge-box">
+      <input type="text" id="fridgeInput" placeholder="比如：西红柿、鸡蛋、青椒、猪肉" autocomplete="off">
+      <button id="fridgeGo">看看能做什么</button>
+    </div>
+    <div id="fridgeResult"></div>
+  </section>
+
+  <section class="view" id="view-light">
+    <p class="sub">清淡、均衡的一餐（不标卡路里、不承诺减重效果）。</p>
+    <section class="menu" id="lightMenu"></section>
+    <button class="reroll" id="lightReroll">🔁 换一桌</button>
   </section>
 </div>
 
@@ -363,17 +425,11 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   const shopListEl = document.getElementById("shopList");
   const progressEl = document.getElementById("progress");
 
-  function render(menu) {
-    // 日期行
-    const d = new Date();
-    const week = "日一二三四五六"[d.getDay()];
-    document.getElementById("dateLine").textContent =
-      (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + week;
-
-    // 菜单卡片
-    menuEl.innerHTML = "";
+  function renderMenu(menu, container) {
+    container.innerHTML = "";
     CATS.forEach(c => {
       const dish = menu[c.key];
+      if (!dish) return;
       const art = document.createElement("article");
       art.className = "card cat-" + c.key;
 
@@ -383,10 +439,6 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
         '<span class="badge">' + c.label + "</span>" +
         '<span class="dish-name">' + dish.name + "</span>" +
         '<span class="chev">▾</span>';
-      head.addEventListener("click", () => {
-        const open = art.classList.toggle("open");
-        body.hidden = !open;
-      });
 
       const body = document.createElement("div");
       body.className = "card-body";
@@ -399,10 +451,24 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
         dish.steps.map(s => "<li>" + s + "</li>").join("") +
         "</ol></section>";
 
+      head.addEventListener("click", () => {
+        const open = art.classList.toggle("open");
+        body.hidden = !open;
+      });
+
       art.appendChild(head);
       art.appendChild(body);
-      menuEl.appendChild(art);
+      container.appendChild(art);
     });
+  }
+
+  function render(menu) {
+    const d = new Date();
+    const week = "日一二三四五六"[d.getDay()];
+    document.getElementById("dateLine").textContent =
+      (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + week;
+
+    renderMenu(menu, menuEl);
 
     // 买菜清单
     const ings = collectIngredients(menu);
@@ -438,6 +504,183 @@ h1 { font-size: 30px; font-weight: 800; margin: 4px 0 6px; letter-spacing: -.01e
   document.getElementById("reroll").addEventListener("click", reroll);
 
   render(buildMenu());
+
+  // ===== 一人餐 =====
+  const SOLO = {
+    lazy: {
+      emoji: "🍜", title: "懒人随便吃", desc: "简单、方便、少洗锅",
+      taglines: ["今天不想折腾？少洗一个锅也是胜利。", "能用一个锅，绝不用两个。", "糊弄一顿，不丢人。"],
+      ideas: [
+        { name: "煮个面", desc: "清水煮面 + 煎个荷包蛋 + 烫两根青菜，淋点生抽香油，10分钟。" },
+        { name: "蛋炒饭", desc: "隔夜饭 + 俩鸡蛋 + 葱花，5分钟炒好。" },
+        { name: "蒸个蛋", desc: "两个蛋打散 + 温水，上锅蒸8分钟，淋生抽。" },
+        { name: "煮饺子", desc: "速冻饺子下锅点三次水，配醋蒜。" },
+        { name: "拌个凉面", desc: "挂面煮熟过凉水，加黄瓜丝 + 芝麻酱 + 醋一拌。" },
+        { name: "煎馒头片", desc: "馒头切片裹蛋液，煎到金黄，配点咸菜。" },
+        { name: "泡面加蛋", desc: "泡面煮开加个蛋 + 火腿肠 + 两片青菜，3分钟。" },
+        { name: "煮汤圆", desc: "速冻汤圆下锅煮到浮起，当一顿。" }
+      ]
+    },
+    nice: {
+      emoji: "🥘", title: "今天吃点好的", desc: "给自己加个餐，稍微认真点",
+      taglines: ["一个人也别亏待自己的胃。", "犒劳自己，今天加个鸡腿。", "一个人也要有仪式感。"],
+      ideas: [
+        { name: "番茄牛腩饭", desc: "番茄牛腩炖一锅，浇在米饭上，能管两顿。" },
+        { name: "黄焖鸡米饭", desc: "黄焖鸡炖一锅配米饭，像外面卖的那样。" },
+        { name: "可乐鸡翅", desc: "鸡翅煎一煎加可乐焖，甜口解馋。" },
+        { name: "清蒸鲈鱼", desc: "蒸一条鲈鱼淋豉油，鲜掉眉毛。" },
+        { name: "红烧排骨", desc: "排骨炖一锅，糖色红亮，啃着过瘾。" },
+        { name: "蒜蓉蒸虾", desc: "虾开背铺蒜蓉蒸6分钟，鲜香。" },
+        { name: "番茄炒蛋盖饭", desc: "番茄炒蛋多炒点汁，浇饭上，经典下饭。" },
+        { name: "煎牛排", desc: "牛排煎到七分熟，配点西兰花，一个人的西餐。" }
+      ]
+    },
+    noCook: {
+      emoji: "🛒", title: "不想做饭了", desc: "今天就吃点简单的，放过自己",
+      taglines: ["今天放过自己，出去吃点好的。", "懒不是罪，是今天的合法状态。", "下厨的事，明天再说。"],
+      ideas: [
+        { name: "楼下便利店", desc: "饭团 + 牛奶 + 香蕉，10块钱解决。" },
+        { name: "楼下面馆", desc: "一碗牛肉面加个卤蛋，热乎。" },
+        { name: "点个外卖", desc: "黄焖鸡米饭或盖浇饭，送到家。" },
+        { name: "炒饭摊", desc: "一份蛋炒饭 + 一瓶冰饮，省事。" },
+        { name: "包子铺", desc: "两个肉包 + 一碗豆浆，管饱。" },
+        { name: "麻辣烫", desc: "外卖点份麻辣烫，想加啥加啥。" },
+        { name: "面包店", desc: "一个三明治 + 一杯酸奶，凑合一顿。" },
+        { name: "楼下烧烤", desc: "几串烤肉，一个人的快乐。" }
+      ]
+    }
+  };
+
+  const soloEntriesEl = document.getElementById("soloEntries");
+  const soloResultEl = document.getElementById("soloResult");
+  let soloKey = null;
+
+  function renderSoloEntries() {
+    soloEntriesEl.innerHTML = "";
+    Object.keys(SOLO).forEach(function (key) {
+      const s = SOLO[key];
+      const div = document.createElement("div");
+      div.className = "solo-entry";
+      div.innerHTML =
+        '<div class="solo-emoji">' + s.emoji + "</div>" +
+        '<div class="solo-title">' + s.title + "</div>" +
+        '<div class="solo-desc">' + s.desc + "</div>";
+      div.addEventListener("click", function () { showSolo(key); });
+      soloEntriesEl.appendChild(div);
+    });
+  }
+
+  function showSolo(key) {
+    soloKey = key;
+    const s = SOLO[key];
+    const tagline = s.taglines[Math.floor(Math.random() * s.taglines.length)];
+    const idea = s.ideas[Math.floor(Math.random() * s.ideas.length)];
+    soloResultEl.hidden = false;
+    soloResultEl.innerHTML =
+      '<p class="tagline">' + tagline + "</p>" +
+      '<p class="idea">' + idea.name + "</p>" +
+      '<p class="idea-desc">' + idea.desc + "</p>" +
+      '<button class="again" id="soloAgain">换个主意</button>';
+    document.getElementById("soloAgain").addEventListener("click", function () { showSolo(soloKey); });
+    soloResultEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  renderSoloEntries();
+
+  // ===== 清冰箱 =====
+  const SKIP_ING = ["生抽", "老抽", "盐", "糖", "白糖", "冰糖", "醋", "白醋", "淀粉", "料酒", "油", "食用油", "姜", "蒜", "葱", "小葱", "葱花", "姜片", "蒜末", "八角", "花椒", "干辣椒", "豆瓣酱", "白胡椒粉", "白胡椒", "香油", "蚝油", "甜面酱", "咖喱块", "椒盐", "孜然粉", "辣椒粉", "番茄酱", "蒸鱼豉油", "豆豉", "虾皮", "香菜", "温水", "开水", "热水"];
+
+  function coreOf(ing) {
+    return ing.map(function (item) {
+      return item.split(" ")[0].trim();
+    }).filter(function (name) { return name && SKIP_ING.indexOf(name) === -1; });
+  }
+
+  function matchFridge(inputs) {
+    const results = [];
+    RECIPES.forEach(function (r) {
+      const core = coreOf(r.ing);
+      if (core.length === 0) return;
+      const have = core.filter(function (c) {
+        return inputs.some(function (u) { return c.indexOf(u) !== -1 || u.indexOf(c) !== -1; });
+      });
+      if (have.length === 0) return;
+      const lack = core.filter(function (c) { return have.indexOf(c) === -1; });
+      results.push({ recipe: r, have: have, lack: lack, score: have.length / core.length });
+    });
+    results.sort(function (a, b) { return b.score - a.score; });
+    return results;
+  }
+
+  const fridgeInput = document.getElementById("fridgeInput");
+  const fridgeGo = document.getElementById("fridgeGo");
+  const fridgeResult = document.getElementById("fridgeResult");
+
+  function renderFridge() {
+    const raw = fridgeInput.value;
+    if (!raw.trim()) { fridgeResult.innerHTML = '<div class="fridge-empty">先输入冰箱里的食材哦～</div>'; return; }
+    const inputs = raw.split(/[,，、\s]+/).filter(Boolean).map(function (s) { return s.trim(); });
+    const matches = matchFridge(inputs);
+    if (matches.length === 0) {
+      fridgeResult.innerHTML = '<div class="fridge-empty">没找到特别匹配的菜，试试输入更常见的食材（比如 鸡蛋、番茄、青椒、猪肉、土豆）。</div>';
+      return;
+    }
+    let html = "";
+    matches.slice(0, 8).forEach(function (m) {
+      const pct = Math.round(m.score * 100);
+      html +=
+        '<div class="match-card"><div class="match-top"><span class="match-name">' + m.recipe.name + '</span><span class="match-pct">' + pct + '% 能成</span></div>' +
+        '<div class="match-lines"><span class="have">✅ 已有：' + (m.have.length ? m.have.join("、") : "—") + "</span><br>" +
+        '<span class="lack">❌ 还缺：' + (m.lack.length ? m.lack.join("、") : "没有，齐了") + "</span></div></div>";
+    });
+    fridgeResult.innerHTML = html;
+  }
+
+  fridgeGo.addEventListener("click", renderFridge);
+  fridgeInput.addEventListener("keydown", function (e) { if (e.key === "Enter") renderFridge(); });
+
+  // ===== 减脂餐 =====
+  const lightMenuEl = document.getElementById("lightMenu");
+
+  function isLight(r) {
+    if (r.cat === "soup") return true;
+    const n = r.name;
+    if (/红烧|糖醋|回锅|干煸|辣子|水煮|油炸|咖喱|焖|炸/.test(n)) return false;
+    if (/清蒸|白灼|清炒|凉拌|蒜蓉|汤|蒸|煮|焯/.test(n)) return true;
+    return r.cat === "veg";
+  }
+
+  function buildLightMenu() {
+    const lightPool = RECIPES.filter(isLight);
+    const soupPool = lightPool.filter(function (r) { return r.cat === "soup"; });
+    const vegPool = lightPool.filter(function (r) { return r.cat === "veg"; });
+    const meatPool = lightPool.filter(function (r) { return r.cat === "meat"; });
+    const staplePool = RECIPES.filter(function (r) { return r.cat === "staple"; });
+    const rnd = mulberry32(hashStr(todayStr()) ^ 0x9e3779b9);
+    function pickOne(pool) { return pool[Math.floor(rnd() * pool.length)]; }
+    return {
+      soup: pickOne(soupPool.length ? soupPool : lightPool),
+      meat: pickOne(meatPool.length ? meatPool : vegPool),
+      veg: pickOne(vegPool),
+      staple: pickOne(staplePool)
+    };
+  }
+
+  renderMenu(buildLightMenu(), lightMenuEl);
+  document.getElementById("lightReroll").addEventListener("click", function () {
+    renderMenu(buildLightMenu(), lightMenuEl);
+  });
+
+  // ===== 顶部 tab 切换 =====
+  const tabs = document.querySelectorAll(".tab");
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.classList.remove("active"); });
+      tab.classList.add("active");
+      document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+      document.getElementById("view-" + tab.dataset.view).classList.add("active");
+    });
+  });
 })();
 </script>
 <script>
